@@ -1,12 +1,17 @@
 import { Patient, Appointment, Practitioner, Business, AppointmentType, AvailableTime, ClinikoListResponse, Invoice, InvoiceItem, Payment, Product, Tax, PatientCase } from './types.js';
 
 export class ClinikoClient {
-  private baseUrl = 'https://api.au1.cliniko.com/v1';
+  private baseUrl = 'https://api.au4.cliniko.com/v1';
   private headers: HeadersInit;
 
   constructor(apiKey: string) {
+    // Use browser-compatible Base64 encoding instead of Buffer
+    const base64Auth = typeof btoa !== 'undefined' 
+      ? btoa(apiKey + ':') 
+      : Buffer.from(apiKey + ':').toString('base64');
+      
     this.headers = {
-      'Authorization': `Basic ${Buffer.from(apiKey + ':').toString('base64')}`,
+      'Authorization': `Basic ${base64Auth}`,
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'User-Agent': 'MCP-Cliniko/1.0'

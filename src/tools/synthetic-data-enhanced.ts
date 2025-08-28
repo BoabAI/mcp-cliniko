@@ -46,7 +46,7 @@ const productNames = [
 ];
 
 // Insurance/payment related
-const paymentMethods = ['Cash', 'Credit Card', 'EFTPOS', 'Medicare Bulk Bill', 'Health Fund', 'Direct Deposit'];
+const paymentMethods = ['cash', 'credit_card', 'eft', 'cheque', 'other'];
 const healthFunds = ['Medibank', 'Bupa', 'HCF', 'NIB', 'HBF', 'AHM', 'CBHS', 'Defence Health'];
 
 // Company names for contacts/suppliers
@@ -500,7 +500,8 @@ export function registerEnhancedSyntheticDataTools(server: any, client: ClinikoC
         }
       }
 
-      // 6. Create Invoices
+      // 6. Create Invoices - DISABLED DUE TO API ISSUES
+      /* Invoice creation is currently disabled due to 404 errors
       if (params.num_invoices > 0 && createdPatients.length > 0 && createdProducts.length > 0) {
         for (let i = 0; i < params.num_invoices; i++) {
           const patient = randomElement(createdPatients);
@@ -566,25 +567,30 @@ export function registerEnhancedSyntheticDataTools(server: any, client: ClinikoC
           }
         }
       }
+      */
 
-      // 7. Create Payments for some invoices
+      // 7. Create Payments - DISABLED (depends on invoices)
+      /* Payment creation is currently disabled as it depends on invoice creation
       if (params.num_payments > 0 && results.created.invoices.length > 0) {
         const invoicesToPay = randomElements(results.created.invoices, Math.min(params.num_payments, results.created.invoices.length));
         
-        for (const invoiceRef of invoicesToPay) {
+        for (let i = 0; i < invoicesToPay.length; i++) {
+          const invoiceRef = invoicesToPay[i];
           try {
             const paymentData = {
               amount: invoiceRef.amount,
               invoice_id: invoiceRef.id,
               payment_method: randomElement(paymentMethods),
-              reference_number: `PAY-TEST-${Date.now()}`,
-              received_at: generatePastDate(1, 7).toISOString()
+              reference: `PAY-TEST-${Date.now()}-${i}`,
+              paid_at: generatePastDate(1, 7).toISOString()
             };
             
             const payment = await client.createPayment({
               amount: paymentData.amount,
               invoice_id: paymentData.invoice_id,
-              paid_at: paymentData.received_at
+              paid_at: paymentData.paid_at,
+              payment_method: paymentData.payment_method,
+              reference: paymentData.reference
             });
             
             results.created.payments.push({
@@ -598,6 +604,7 @@ export function registerEnhancedSyntheticDataTools(server: any, client: ClinikoC
           }
         }
       }
+      */
 
       // Calculate summary
       results.summary.total_created = 
