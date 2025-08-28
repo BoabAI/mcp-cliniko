@@ -1,4 +1,4 @@
-import { Patient, Appointment, Practitioner, Business, AppointmentType, AvailableTime, ClinikoListResponse } from './types.js';
+import { Patient, Appointment, Practitioner, Business, AppointmentType, AvailableTime, ClinikoListResponse, Invoice, InvoiceItem, Payment, Product, Tax, PatientCase } from './types.js';
 
 export class ClinikoClient {
   private baseUrl = 'https://api.au4.cliniko.com/v1';
@@ -182,5 +182,221 @@ export class ClinikoClient {
     
     const response = await this.request<{ available_times: AvailableTime[] }>(`/available_times?${searchParams.toString()}`);
     return response.available_times;
+  }
+
+  // Invoice methods
+  async listInvoices(params?: {
+    page?: number;
+    per_page?: number;
+    patient_id?: number;
+    practitioner_id?: number;
+    issued_at_from?: string;
+    issued_at_to?: string;
+    status?: string;
+  }): Promise<ClinikoListResponse<Invoice>> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.per_page) searchParams.append('per_page', params.per_page.toString());
+    if (params?.patient_id) searchParams.append('q[patient_id]', params.patient_id.toString());
+    if (params?.practitioner_id) searchParams.append('q[practitioner_id]', params.practitioner_id.toString());
+    if (params?.issued_at_from) searchParams.append('q[issued_at][gte]', params.issued_at_from);
+    if (params?.issued_at_to) searchParams.append('q[issued_at][lte]', params.issued_at_to);
+    if (params?.status) searchParams.append('q[status]', params.status);
+    
+    return this.request<ClinikoListResponse<Invoice>>(`/invoices${searchParams.toString() ? '?' + searchParams.toString() : ''}`);
+  }
+
+  async getInvoice(id: number): Promise<Invoice> {
+    return this.request<Invoice>(`/invoices/${id}`);
+  }
+
+  async createInvoice(invoice: {
+    patient_id: number;
+    practitioner_id: number;
+    issued_at: string;
+    status?: string;
+    notes?: string;
+    payment_terms?: number;
+    appointment_ids?: number[];
+    invoice_items?: Array<{
+      description: string;
+      unit_price: number;
+      quantity: number;
+      discount_percentage?: number;
+      tax_id?: number;
+      product_id?: number;
+    }>;
+  }): Promise<Invoice> {
+    return this.request<Invoice>('/invoices', {
+      method: 'POST',
+      body: JSON.stringify(invoice),
+    });
+  }
+
+  async updateInvoice(id: number, invoice: {
+    status?: string;
+    notes?: string;
+    payment_terms?: number;
+  }): Promise<Invoice> {
+    return this.request<Invoice>(`/invoices/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(invoice),
+    });
+  }
+
+  async deleteInvoice(id: number): Promise<void> {
+    return this.request<void>(`/invoices/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Invoice Item methods
+  async listInvoiceItems(invoiceId: number): Promise<ClinikoListResponse<InvoiceItem>> {
+    return this.request<ClinikoListResponse<InvoiceItem>>(`/invoices/${invoiceId}/invoice_items`);
+  }
+
+  async addInvoiceItem(invoiceId: number, item: {
+    description: string;
+    unit_price: number;
+    quantity?: number;
+    discount_percentage?: number;
+    tax_id?: number;
+    product_id?: number;
+  }): Promise<InvoiceItem> {
+    return this.request<InvoiceItem>(`/invoices/${invoiceId}/invoice_items`, {
+      method: 'POST',
+      body: JSON.stringify(item),
+    });
+  }
+
+  async updateInvoiceItem(invoiceId: number, itemId: number, item: {
+    description?: string;
+    unit_price?: number;
+    quantity?: number;
+    discount_percentage?: number;
+  }): Promise<InvoiceItem> {
+    return this.request<InvoiceItem>(`/invoices/${invoiceId}/invoice_items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify(item),
+    });
+  }
+
+  async deleteInvoiceItem(invoiceId: number, itemId: number): Promise<void> {
+    return this.request<void>(`/invoices/${invoiceId}/invoice_items/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Payment methods
+  async listPayments(params?: {
+    page?: number;
+    per_page?: number;
+    invoice_id?: number;
+    patient_id?: number;
+    created_at_from?: string;
+    created_at_to?: string;
+  }): Promise<ClinikoListResponse<Payment>> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.per_page) searchParams.append('per_page', params.per_page.toString());
+    if (params?.invoice_id) searchParams.append('q[invoice_id]', params.invoice_id.toString());
+    if (params?.patient_id) searchParams.append('q[patient_id]', params.patient_id.toString());
+    if (params?.created_at_from) searchParams.append('q[created_at][gte]', params.created_at_from);
+    if (params?.created_at_to) searchParams.append('q[created_at][lte]', params.created_at_to);
+    
+    return this.request<ClinikoListResponse<Payment>>(`/payments${searchParams.toString() ? '?' + searchParams.toString() : ''}`);
+  }
+
+  async getPayment(id: number): Promise<Payment> {
+    return this.request<Payment>(`/payments/${id}`);
+  }
+
+  async createPayment(payment: {
+    invoice_id: number;
+    amount: number;
+    paid_at: string;
+    payment_method?: string;
+    reference?: string;
+  }): Promise<Payment> {
+    return this.request<Payment>('/payments', {
+      method: 'POST',
+      body: JSON.stringify(payment),
+    });
+  }
+
+  async deletePayment(id: number): Promise<void> {
+    return this.request<void>(`/payments/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Product methods
+  async listProducts(params?: {
+    page?: number;
+    per_page?: number;
+  }): Promise<ClinikoListResponse<Product>> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.per_page) searchParams.append('per_page', params.per_page.toString());
+    
+    return this.request<ClinikoListResponse<Product>>(`/products${searchParams.toString() ? '?' + searchParams.toString() : ''}`);
+  }
+
+  async getProduct(id: number): Promise<Product> {
+    return this.request<Product>(`/products/${id}`);
+  }
+
+  async createProduct(product: {
+    name: string;
+    item_code: string;
+    unit_price: number;
+    description?: string;
+    tax_id?: number;
+  }): Promise<Product> {
+    return this.request<Product>('/products', {
+      method: 'POST',
+      body: JSON.stringify(product),
+    });
+  }
+
+  async updateProduct(id: number, product: {
+    name?: string;
+    item_code?: string;
+    unit_price?: number;
+    description?: string;
+    tax_id?: number;
+  }): Promise<Product> {
+    return this.request<Product>(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(product),
+    });
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    return this.request<void>(`/products/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Tax methods
+  async listTaxes(): Promise<ClinikoListResponse<Tax>> {
+    return this.request<ClinikoListResponse<Tax>>('/taxes');
+  }
+
+  async getTax(id: number): Promise<Tax> {
+    return this.request<Tax>(`/taxes/${id}`);
+  }
+
+  // Patient Case methods
+  async listPatientCases(patientId: number): Promise<ClinikoListResponse<PatientCase>> {
+    return this.request<ClinikoListResponse<PatientCase>>(`/patients/${patientId}/cases`);
+  }
+
+  async getPatientCase(id: number): Promise<PatientCase> {
+    return this.request<PatientCase>(`/cases/${id}`);
+  }
+
+  async getCaseInvoices(caseId: number): Promise<ClinikoListResponse<Invoice>> {
+    return this.request<ClinikoListResponse<Invoice>>(`/cases/${caseId}/invoices`);
   }
 }

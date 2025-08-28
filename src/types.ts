@@ -134,3 +134,149 @@ export interface ClinikoListResponse<T> {
     next?: string;
   };
 }
+
+export interface Invoice {
+  id: number;
+  invoice_number?: string;
+  issued_at: string;
+  due_at?: string;
+  status: 'draft' | 'awaiting_payment' | 'part_paid' | 'paid' | 'void' | 'write_off';
+  total: number;
+  tax_total: number;
+  subtotal: number;
+  amount_paid: number;
+  amount_outstanding: number;
+  notes?: string;
+  payment_terms?: number;
+  patient: {
+    id: number;
+    name: string;
+    links: {
+      self: string;
+    };
+  };
+  practitioner: {
+    id: number;
+    name: string;
+    links: {
+      self: string;
+    };
+  };
+  business: {
+    id: number;
+    name: string;
+    links: {
+      self: string;
+    };
+  };
+  invoice_items?: InvoiceItem[];
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+    patient: string;
+    practitioner: string;
+    invoice_items?: string;
+    payments?: string;
+  };
+}
+
+export interface InvoiceItem {
+  id: number;
+  invoice_id: number;
+  description: string;
+  unit_price: number;
+  quantity: number;
+  discount_percentage: number;
+  discount_amount: number;
+  tax_amount: number;
+  net_amount: number;
+  total_amount: number;
+  product?: {
+    id: number;
+    name: string;
+  };
+  tax?: {
+    id: number;
+    name: string;
+    rate: number;
+  };
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+    invoice: string;
+  };
+}
+
+export interface Payment {
+  id: number;
+  amount: number;
+  paid_at: string;
+  payment_method: 'cash' | 'credit_card' | 'eft' | 'cheque' | 'other';
+  reference?: string;
+  invoice: {
+    id: number;
+    invoice_number: string;
+    links: {
+      self: string;
+    };
+  };
+  patient: {
+    id: number;
+    name: string;
+    links: {
+      self: string;
+    };
+  };
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+    invoice: string;
+    patient: string;
+  };
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  item_code: string;
+  unit_price: number;
+  description?: string;
+  tax?: {
+    id: number;
+    name: string;
+    rate: number;
+  };
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+  };
+}
+
+export interface Tax {
+  id: number;
+  name: string;
+  rate: number;
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+  };
+}
+
+export interface PatientCase {
+  id: number;
+  name: string;
+  patient_id: number;
+  status: 'active' | 'closed';
+  created_at: string;
+  updated_at: string;
+  links?: {
+    self: string;
+    patient: string;
+    invoices?: string;
+  };
+}

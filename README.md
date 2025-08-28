@@ -21,6 +21,39 @@ A Model Context Protocol (MCP) server that provides integration with the Cliniko
   - `delete_appointment` - Delete appointment
   - `get_available_times` - Get practitioner availability
 
+- **Invoice Management**
+  - `list_invoices` - List and filter invoices
+  - `get_invoice` - Get invoice details
+  - `create_invoice` - Create new invoice
+  - `update_invoice` - Update invoice status or details
+  - `delete_invoice` - Delete draft invoice
+  
+- **Invoice Items**
+  - `list_invoice_items` - List items on an invoice
+  - `add_invoice_item` - Add item to invoice
+  - `update_invoice_item` - Modify invoice item
+  - `delete_invoice_item` - Remove item from invoice
+
+- **Payment Processing**
+  - `list_payments` - List payments with filtering
+  - `create_payment` - Record a payment
+  - `delete_payment` - Delete payment record
+
+- **Products & Services**
+  - `list_products` - List billable products/services
+  - `get_product` - Get product details
+  - `create_product` - Create new product/service
+  
+- **Tax Configuration**
+  - `list_taxes` - List available tax rates
+  - `get_tax` - Get tax details
+
+- **Complex Workflows**
+  - `create_invoice_from_appointments` - Generate invoices from appointments
+  - `bulk_invoice_generation` - Bulk create invoices for date range
+  - `list_patient_cases` - List patient cases
+  - `list_invoices_for_case` - Get invoices for a case
+
 - **Supporting Tools**
   - `list_practitioners` - List all practitioners
   - `list_appointment_types` - List appointment types

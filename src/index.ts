@@ -6,6 +6,7 @@ import { ClinikoClient } from './cliniko-client.js';
 import { registerPatientTools } from './tools/patients.js';
 import { registerAppointmentTools } from './tools/appointments.js';
 import { registerSyntheticDataTools } from './tools/synthetic-data.js';
+import { registerInvoiceTools } from './tools/invoices.js';
 import { registerResources } from './resources/index.js';
 
 const API_KEY = process.env.CLINIKO_API_KEY;
@@ -55,6 +56,7 @@ const resourceRegistry = {
 registerPatientTools(toolRegistry, clinikoClient);
 registerAppointmentTools(toolRegistry, clinikoClient);
 registerSyntheticDataTools(toolRegistry, clinikoClient);
+registerInvoiceTools(toolRegistry, clinikoClient);
 
 // Register all resources
 registerResources(resourceRegistry, clinikoClient);
