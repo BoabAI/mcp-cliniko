@@ -20,8 +20,6 @@ const PatientCreateSchema = z.object({
   medicare_reference_number: z.string().optional().describe('Medicare reference number'),
 });
 
-const PatientUpdateSchema = PatientCreateSchema.partial();
-
 const PatientSearchSchema = z.object({
   q: z.string().optional().describe('Search query (searches name, email, phone)'),
   page: z.number().optional().describe('Page number'),
