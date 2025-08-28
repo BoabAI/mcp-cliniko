@@ -4,7 +4,7 @@ import { ClinikoClient } from '../cliniko-client.js';
 const InvoiceCreateSchema = z.object({
   patient_id: z.number().describe('Patient ID'),
   practitioner_id: z.number().describe('Practitioner ID'),
-  issued_at: z.string().describe('Invoice date (ISO 8601 format)'),
+  issue_date: z.string().describe('Invoice date (ISO 8601 or YYYY-MM-DD format)'),
   status: z.enum(['draft', 'awaiting_payment', 'part_paid', 'paid', 'void', 'write_off']).optional().default('draft').describe('Invoice status'),
   notes: z.string().optional().describe('Invoice notes'),
   payment_terms: z.number().optional().describe('Payment terms in days'),
@@ -137,7 +137,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
       properties: {
         patient_id: { type: 'number', description: 'Patient ID' },
         practitioner_id: { type: 'number', description: 'Practitioner ID' },
-        issued_at: { type: 'string', description: 'Invoice date (ISO 8601)' },
+        issue_date: { type: 'string', description: 'Invoice date (YYYY-MM-DD or ISO 8601)' },
         status: { 
           type: 'string',
           enum: ['draft', 'awaiting_payment', 'part_paid', 'paid', 'void', 'write_off'],
@@ -167,7 +167,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
           description: 'Invoice line items'
         }
       },
-      required: ['patient_id', 'practitioner_id', 'issued_at']
+      required: ['patient_id', 'practitioner_id', 'issue_date']
     },
   }, async (params: z.infer<typeof InvoiceCreateSchema>) => {
     try {
@@ -180,7 +180,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
 - Invoice #${invoice.invoice_number || invoice.id}
 - Patient: ${invoice.patient?.name}
 - Status: ${invoice.status}
-- Total: $${invoice.total}`
+- Total: ${invoice.total}`
         }],
         data: invoice
       };
@@ -741,7 +741,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
           const invoice = await client.createInvoice({
             patient_id,
             practitioner_id: appointment.practitioner.id,
-            issued_at: appointment.starts_at,
+            issue_date: appointment.starts_at,
             appointment_ids: [appointment_id],
             invoice_items: [item]
           });
@@ -754,7 +754,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
         const invoice = await client.createInvoice({
           patient_id,
           practitioner_id: practitioner_id!,
-          issued_at,
+          issue_date: issued_at,
           appointment_ids,
           invoice_items: allItems
         });
@@ -844,7 +844,7 @@ export function registerInvoiceTools(server: any, client: ClinikoClient) {
             const invoice = await client.createInvoice({
               patient_id: firstApt.patient?.id || 0,
               practitioner_id: firstApt.practitioner.id,
-              issued_at: new Date().toISOString(),
+              issue_date: new Date().toISOString(),
               appointment_ids: groupAppointments.map((a: any) => a.id),
               invoice_items: items
             });

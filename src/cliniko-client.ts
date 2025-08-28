@@ -1,7 +1,7 @@
 import { Patient, Appointment, Practitioner, Business, AppointmentType, AvailableTime, ClinikoListResponse, Invoice, InvoiceItem, Payment, Product, Tax, PatientCase } from './types.js';
 
 export class ClinikoClient {
-  private baseUrl = 'https://api.au4.cliniko.com/v1';
+  private baseUrl = 'https://api.au1.cliniko.com/v1';
   private headers: HeadersInit;
 
   constructor(apiKey: string) {
@@ -213,7 +213,7 @@ export class ClinikoClient {
   async createInvoice(invoice: {
     patient_id: number;
     practitioner_id: number;
-    issued_at: string;
+    issue_date: string;  // Changed from issued_at to issue_date
     status?: string;
     notes?: string;
     payment_terms?: number;
@@ -227,9 +227,15 @@ export class ClinikoClient {
       product_id?: number;
     }>;
   }): Promise<Invoice> {
+    // Map issue_date field properly and ensure date format
+    const invoiceData = { ...invoice };
+    if (invoice.issue_date && invoice.issue_date.includes('T')) {
+      // Convert ISO datetime to YYYY-MM-DD format
+      invoiceData.issue_date = invoice.issue_date.split('T')[0];
+    }
     return this.request<Invoice>('/invoices', {
       method: 'POST',
-      body: JSON.stringify(invoice),
+      body: JSON.stringify(invoiceData),
     });
   }
 
@@ -353,9 +359,15 @@ export class ClinikoClient {
     description?: string;
     tax_id?: number;
   }): Promise<Product> {
+    // Map unit_price to price for API compatibility
+    const { unit_price, ...rest } = product;
+    const apiProduct = {
+      ...rest,
+      price: unit_price
+    };
     return this.request<Product>('/products', {
       method: 'POST',
-      body: JSON.stringify(product),
+      body: JSON.stringify(apiProduct),
     });
   }
 
@@ -366,9 +378,15 @@ export class ClinikoClient {
     description?: string;
     tax_id?: number;
   }): Promise<Product> {
+    // Map unit_price to price for API compatibility
+    const { unit_price, ...rest } = product;
+    const apiProduct = unit_price !== undefined ? {
+      ...rest,
+      price: unit_price
+    } : rest;
     return this.request<Product>(`/products/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(product),
+      body: JSON.stringify(apiProduct),
     });
   }
 
