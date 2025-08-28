@@ -72,6 +72,7 @@ A Model Context Protocol (MCP) server that provides integration with the Cliniko
 - `practitioners://list` - All practitioners
 - `businesses://list` - All businesses
 - `appointment-types://list` - All appointment types
+- `openapi://spec` - Cliniko API OpenAPI specification (YAML format)
 
 ## Installation
 

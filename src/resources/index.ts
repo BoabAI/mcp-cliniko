@@ -1,4 +1,7 @@
 import { ClinikoClient } from '../cliniko-client.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 export function registerResources(server: any, client: ClinikoClient) {
   // Patient resources
@@ -181,6 +184,32 @@ export function registerResources(server: any, client: ClinikoClient) {
       };
     } catch (error) {
       throw new Error(`Failed to fetch appointment types: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  });
+
+  // OpenAPI Specification resource
+  server.resource('openapi://spec', {
+    description: 'Cliniko API OpenAPI specification',
+    mimeType: 'application/x-yaml',
+  }, async () => {
+    try {
+      // Get the directory of the current module
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      
+      // Read the OpenAPI spec file
+      const specPath = join(__dirname, 'openapi.yaml');
+      const openApiSpec = readFileSync(specPath, 'utf-8');
+      
+      return {
+        contents: [{
+          uri: 'openapi://spec',
+          mimeType: 'application/x-yaml',
+          text: openApiSpec
+        }]
+      };
+    } catch (error) {
+      throw new Error(`Failed to load OpenAPI specification: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 }
