@@ -189,7 +189,8 @@ export class ClinikoClient {
     return response.available_times;
   }
 
-  // Invoice methods
+  // Invoice methods (READ-ONLY - Cliniko API does not support creating/updating/deleting invoices via API)
+  // Invoices must be created through the Cliniko web interface
   async listInvoices(params?: {
     page?: number;
     per_page?: number;
@@ -215,88 +216,34 @@ export class ClinikoClient {
     return this.request<Invoice>(`/invoices/${id}`);
   }
 
-  async createInvoice(invoice: {
-    patient_id: number;
-    practitioner_id: number;
-    issue_date: string;  // Changed from issued_at to issue_date
-    status?: string;
-    notes?: string;
-    payment_terms?: number;
-    appointment_ids?: number[];
-    invoice_items?: Array<{
-      description: string;
-      unit_price: number;
-      quantity: number;
-      discount_percentage?: number;
-      tax_id?: number;
-      product_id?: number;
-    }>;
-  }): Promise<Invoice> {
-    // Map issue_date field properly and ensure date format
-    const invoiceData = { ...invoice };
-    if (invoice.issue_date && invoice.issue_date.includes('T')) {
-      // Convert ISO datetime to YYYY-MM-DD format
-      invoiceData.issue_date = invoice.issue_date.split('T')[0];
-    }
-    return this.request<Invoice>('/invoices', {
-      method: 'POST',
-      body: JSON.stringify(invoiceData),
-    });
+  // Get invoices for a specific appointment
+  async getAppointmentInvoices(appointmentId: number): Promise<ClinikoListResponse<Invoice>> {
+    return this.request<ClinikoListResponse<Invoice>>(`/appointments/${appointmentId}/invoices`);
   }
 
-  async updateInvoice(id: number, invoice: {
-    status?: string;
-    notes?: string;
-    payment_terms?: number;
-  }): Promise<Invoice> {
-    return this.request<Invoice>(`/invoices/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(invoice),
-    });
+  // Get invoices for a specific patient  
+  async getPatientInvoices(patientId: number): Promise<ClinikoListResponse<Invoice>> {
+    return this.request<ClinikoListResponse<Invoice>>(`/patients/${patientId}/invoices`);
   }
 
-  async deleteInvoice(id: number): Promise<void> {
-    return this.request<void>(`/invoices/${id}`, {
-      method: 'DELETE',
-    });
-  }
+  // DEPRECATED: Invoice creation/update/deletion methods are not supported by the Cliniko API
+  // Invoices can only be created/updated/deleted through the Cliniko web interface
+  // The following methods have been removed:
+  // - createInvoice() - NOT SUPPORTED BY API
+  // - updateInvoice() - NOT SUPPORTED BY API
+  // - deleteInvoice() - NOT SUPPORTED BY API
 
-  // Invoice Item methods
+  // Invoice Item methods (READ-ONLY)
   async listInvoiceItems(invoiceId: number): Promise<ClinikoListResponse<InvoiceItem>> {
     return this.request<ClinikoListResponse<InvoiceItem>>(`/invoices/${invoiceId}/invoice_items`);
   }
 
-  async addInvoiceItem(invoiceId: number, item: {
-    description: string;
-    unit_price: number;
-    quantity?: number;
-    discount_percentage?: number;
-    tax_id?: number;
-    product_id?: number;
-  }): Promise<InvoiceItem> {
-    return this.request<InvoiceItem>(`/invoices/${invoiceId}/invoice_items`, {
-      method: 'POST',
-      body: JSON.stringify(item),
-    });
-  }
-
-  async updateInvoiceItem(invoiceId: number, itemId: number, item: {
-    description?: string;
-    unit_price?: number;
-    quantity?: number;
-    discount_percentage?: number;
-  }): Promise<InvoiceItem> {
-    return this.request<InvoiceItem>(`/invoices/${invoiceId}/invoice_items/${itemId}`, {
-      method: 'PUT',
-      body: JSON.stringify(item),
-    });
-  }
-
-  async deleteInvoiceItem(invoiceId: number, itemId: number): Promise<void> {
-    return this.request<void>(`/invoices/${invoiceId}/invoice_items/${itemId}`, {
-      method: 'DELETE',
-    });
-  }
+  // DEPRECATED: Invoice item modification methods are not supported by the Cliniko API
+  // Invoice items can only be created/updated/deleted through the Cliniko web interface
+  // The following methods have been removed:
+  // - addInvoiceItem() - NOT SUPPORTED BY API
+  // - updateInvoiceItem() - NOT SUPPORTED BY API
+  // - deleteInvoiceItem() - NOT SUPPORTED BY API
 
   // Payment methods
   async listPayments(params?: {

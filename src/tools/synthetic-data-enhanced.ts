@@ -819,12 +819,10 @@ export function registerEnhancedSyntheticDataTools(server: any, client: ClinikoC
           results.found.invoices.push(invoiceInfo);
           
           if (!params.dry_run) {
-            try {
-              await client.deleteInvoice(invoice.id);
-              results.deleted.invoices.push(invoiceInfo);
-            } catch (error) {
-              results.errors.push(`Failed to delete invoice ${invoice.id}: ${error instanceof Error ? error.message : 'Unknown'}`);
-            }
+            // NOTE: The Cliniko API does not support deleting invoices programmatically
+            // Invoices can only be voided or deleted through the Cliniko web interface
+            // See INVOICE_API_LIMITATIONS.md for details
+            results.errors.push(`Cannot delete invoice ${invoice.id}: Invoice deletion is not supported by the Cliniko API. Invoices must be voided or deleted manually through the Cliniko web interface.`);
           }
         }
       }
