@@ -4,7 +4,7 @@ import { ClinikoClient } from '../cliniko-client.js';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function registerDemoInvoiceTools(toolRegistry: any, clinikoClient: ClinikoClient) {
-  toolRegistry.register(
+  toolRegistry.tool(
     'demo_invoice_generation',
     {
       description: 'Demo: Generate test patients and appointments, then show how to create invoices. NOTE: Cliniko API is READ-ONLY for invoices - they must be created via the web interface.',
@@ -313,7 +313,7 @@ export function registerDemoInvoiceTools(toolRegistry: any, clinikoClient: Clini
   );
 
   // Tool to display existing invoices for a date
-  toolRegistry.register(
+  toolRegistry.tool(
     'display_invoices_for_date',
     {
       description: 'Display all existing invoices for a specific date (READ-ONLY). Invoices must be created manually in Cliniko.',
