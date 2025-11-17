@@ -52,5 +52,11 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Backup files
+*.bak
+*.old
+*.orig
+*.backup
+
 # MCP specific
 memories.json
